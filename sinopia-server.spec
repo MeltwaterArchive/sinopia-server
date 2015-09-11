@@ -8,6 +8,7 @@ License:	BSD
 URL:		https://github.com/rlidwka/sinopia
 Source0:	config.yaml
 Source1:	sinopia.init
+Source2:	sinopia.config
 
 BuildArch:	noarch
 Requires:	nodejs-sinopia = 1.4.0
