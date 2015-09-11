@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+# Sinopia deamon control script
+#
+# This is based on the init script from the saheba/puppet-sinopia puppet module
+#
+# chkconfig: - 80 20
+# description: Sinopia NPM Proxy/Cache Server
+# processname: sinopia
+# pidfile: /var/run/sinopia/sinopia.pid
+# config: /etc/sinopia/config.yaml
+
+prog=sinopia
+
+. /etc/sysconfig/sinopia
+. /etc/init.d/functions
+
+ECHO_CMD=/bin/echo
+RM_CMD=/bin/rm
+SU_CMD=/bin/su
+CAT_CMD=/bin/cat
+KILL_CMD=/bin/kill
+
+start() {
+  if [ -f $SINOPIA_PIDFILE ]; then
+    read ppid < $SINOPIA_PIDFILE
+    if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+      $ECHO_CMD -n "$prog is already running"
+      failure
+      $ECHO_CMD
+      return 1
+    else
+      $RM_CMD -f $SINOPIA_PIDFILE
+    fi
+  fi
+  $ECHO_CMD -n "Starting $prog: "
+  $SU_CMD $SINOPIA_USER -s /bin/sh -c "cd $SINOPIA_PARENT_DIR ; $SINOPIA_BIN -c /etc/sinopia/config.yaml $SINOPIA_ARGS >/dev/null &"
+  pgrep -f -u $SINOPIA_USER $SINOPIA_BIN > $SINOPIA_PIDFILE
+  $ECHO_CMD
+  RETVAL=$?
+  return $RETVAL
+}
+
+stop() {
+  $ECHO_CMD -n $"Stopping $prog: "
+  $KILL_CMD $($CAT_CMD ${SINOPIA_PIDFILE})
+  RETVAL=$?
+  $ECHO_CMD
+  [ $RETVAL = 0 ] && rm -f ${SINOPIA_PIDFILE}
+}
+
+status() {
+  if [ -f $SINOPIA_PIDFILE ]; then
+    read ppid < $SINOPIA_PIDFILE
+    if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+      $ECHO_CMD "$prog is running (pid $ppid)"
+      return 0
+    else
+      $ECHO_CMD "$prog dead but pid file exists"
+      return 1
+    fi
+  fi
+  $ECHO_CMD "$prog is not running"
+  return 3
+}
+
+case "$1" in
+  start)
+      start
+      ;;
+  stop)
+      stop
+      ;;
+  restart)
+      $0 stop
+      $0 start
+      ;;
+  status)
+      status
+      ;;
+  *)
+      ## If no parameters are given, print which are avaiable.
+      $ECHO_CMD "Usage: $0 {start|stop|status|restart}"
+      exit 1
+      ;;
+esac
