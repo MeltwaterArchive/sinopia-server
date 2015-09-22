@@ -1,6 +1,6 @@
 Name:		sinopia-server
 Version:	1.4.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	A private/caching npm repository server
 
 Group:		unknown
@@ -24,6 +24,7 @@ scripts and default configurations to run sinopia as a system service.
 %install
 rm -rf %{buildroot}
 install -D -m 0644 %{_sourcedir}/config.yaml %{buildroot}%{_sysconfdir}/sinopia/config.yaml
+install -D -m 0644 %{_sourcedir}/sinopia.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/sinopia
 install -D -m 0644 %{_sourcedir}/sinopia.config %{buildroot}%{_sysconfdir}/sysconfig/sinopia
 install -D -m 0755 %{_sourcedir}/sinopia.init %{buildroot}%{_sysconfdir}/rc.d/init.d/sinopia
 mkdir -p %{buildroot}%{_localstatedir}/log/sinopia
@@ -32,8 +33,10 @@ mkdir -p %{buildroot}%{_localstatedir}/run/sinopia
 
 %files
 %{_sysconfdir}/sinopia/config.yaml
+%{_sysconfdir}/logrotate.d/sinopia
 %{_sysconfdir}/rc.d/init.d/sinopia
 %config(noreplace) %{_sysconfdir}/sinopia/config.yaml
+%config(noreplace) %{_sysconfdir}/logrotate.d/sinopia
 %config(noreplace) %{_sysconfdir}/sysconfig/sinopia
 %attr(0755,sinopia,sinopia) %dir %{_localstatedir}/log/sinopia
 %attr(0755,sinopia,sinopia) %dir %{_localstatedir}/run/sinopia
@@ -45,6 +48,9 @@ mkdir -p %{buildroot}%{_localstatedir}/run/sinopia
 
 
 %changelog
+* Tue Sep 22 2015 Jim Sheldon <jim.sheldon@meltwater.com> - 1:1.4.0-2
+- Add logrotate config
+
 * Fri Sep 11 2015 Jim Sheldon <jim.sheldon@meltwater.com> - 1:1.4.0-1
 - Initial sinopia-server spec for 1.4.0
 

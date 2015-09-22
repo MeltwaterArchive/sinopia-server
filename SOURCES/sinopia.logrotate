@@ -1,0 +1,7 @@
+/var/log/sinopia/sinopia.log {
+  compress
+  copytruncate
+  missingok
+  daily
+  rotate 7
+}
